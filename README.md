@@ -43,25 +43,13 @@ git clone https://github.com/BrunaInCodes/agente-inteligente.git
 cd agente-inteligente
 ```
 
-### 2. Crie e ative um ambiente virtual
-
-```bash
-python -m venv venv
-
-# Linux/macOS
-source venv/bin/activate
-
-# Windows
-venv\Scripts\activate
-```
-
-### 3. Instale as dependências
+### 2. Instale as dependências
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Baixe os recursos do NLTK
+### 3. Baixe os recursos do NLTK
 
 Execute uma vez no terminal Python:
 
@@ -71,7 +59,7 @@ nltk.download('punkt')
 nltk.download('stopwords')
 ```
 
-### 5. Inicie o servidor
+### 4. Inicie o servidor
 
 ```bash
 python servidor.py
