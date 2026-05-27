@@ -1,0 +1,32 @@
+{
+    "planilha": "lista_de_compras.xlsx",
+    "colunas": ["ID", "Produto", "Quantidade", "Status"],
+    "acoes": [
+        {
+            "nome": "adicionar",
+            "sinonimos": ["adicionar", "inserir", "colocar", "incluir", "anotar"],
+            "descricao": "Adiciona um item na lista de compras",
+            "exemplo": "adicionar dois pacotes de arroz"
+        },
+        {
+            "nome": "exibir",
+            "sinonimos": ["exibir", "mostrar", "listar", "ver", "apresentar"],
+            "dispositivos": ["lista", "compras", "itens", "dados", "planilha"],
+            "descricao": "Exibe todos os itens da lista de compras",
+            "exemplo": "mostrar lista"
+        },
+        {
+            "nome": "remover",
+            "sinonimos": ["remover", "deletar", "apagar", "excluir", "tirar", "retirar"],
+            "descricao": "Remove um item especifico da lista de compras",
+            "exemplo": "tirar arroz"
+        },
+        {
+            "nome": "organizar",
+            "sinonimos": ["organizar", "ordenar", "classificar", "atualizar", "reorganizar"],
+            "dispositivos": ["lista", "compras", "itens", "dados", "planilha"],
+            "descricao": "Organiza e ordena a lista de compras por nome do produto",
+            "exemplo": "atualizar lista"
+        }
+    ]
+}

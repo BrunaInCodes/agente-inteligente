@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lista de Compras — Assistente Virtual</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:      #0b0b10;
+    --surface: #13131c;
+    --card:    #1b1b28;
+    --border:  #2c2c42;
+    --accent:  #00e5a0;
+    --accent2: #7c6aff;
+    --danger:  #ff4f6a;
+    --warn:    #ffb347;
+    --text:    #e8e8f2;
+    --muted:   #6b6b8a;
+    --radius:  14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,160,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,.025) 1px, transparent 1px);
+    background-size: 44px 44px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative; z-index: 1;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 48px 22px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .brand h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  .brand h1 span { color: var(--accent); }
+
+  .brand p {
+    margin-top: 6px;
+    font-size: .72rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .badge {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: .72rem;
+    color: var(--muted);
+    letter-spacing: .06em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:.3; transform:scale(1.5); }
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: .72rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title::before {
+    content: '';
+    display: block;
+    width: 3px; height: 13px;
+    background: var(--accent);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── botoes de voz ── */
+  .voz-btns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .btn-voz {
+    width: 100%;
+    padding: 18px;
+    border-radius: var(--radius);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: .95rem;
+    letter-spacing: .04em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: opacity .2s, transform .1s;
+    border: 2px solid transparent;
+  }
+
+  .btn-voz:active { transform: scale(.97); }
+  .btn-voz:hover  { opacity: .88; }
+  .btn-voz:disabled { opacity: .3; cursor: not-allowed; transform: none; }
+
+  .btn-iniciar {
+    background: transparent;
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn-iniciar:not(:disabled):hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-iniciar.gravando {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+    animation: glow .8s infinite alternate;
+  }
+
+  @keyframes glow {
+    from { box-shadow: 0 0 0 0 rgba(255,79,106,.5); }
+    to   { box-shadow: 0 0 0 16px rgba(255,79,106,0); }
+  }
+
+  .btns-acao {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .btn-parar {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+
+  .btn-cancelar {
+    background: transparent;
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  .btn-cancelar:not(:disabled):hover {
+    background: var(--danger);
+    color: #fff;
+  }
+
+  /* ── resultado ── */
+  .resultado-box {
+    margin-top: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    min-height: 88px;
+    font-size: .78rem;
+    color: var(--muted);
+    line-height: 2;
+  }
+
+  .lbl     { color: var(--accent2); margin-right: 8px; }
+  .lbl-ok  { color: var(--accent); }
+  .lbl-err { color: var(--danger); }
+
+  /* ── dicas ── */
+  .dicas {
+    margin-top: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: .74rem;
+    color: var(--muted);
+    line-height: 2.1;
+  }
+
+  .dica-linha { display: flex; gap: 8px; align-items: baseline; }
+
+  .dica-tag {
+    background: rgba(0,229,160,.1);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: .68rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .dicas strong { color: var(--text); font-weight: 500; }
+
+  /* ── tabela ── */
+  .table-scroll { overflow-x: auto; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+
+  thead tr { border-bottom: 2px solid var(--border); }
+
+  th {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: .64rem;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 14px;
+    text-align: left;
+  }
+
+  td {
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  tbody tr { transition: background .15s; }
+  tbody tr:hover { background: rgba(255,255,255,.025); }
+
+  .status-tag {
+    display: inline-block;
+    padding: 3px 11px;
+    border-radius: 999px;
+    font-size: .67rem;
+    letter-spacing: .04em;
+    font-weight: 500;
+    background: rgba(255,179,71,.12);
+    color: var(--warn);
+  }
+
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 40px;
+    font-size: .8rem;
+  }
+
+  /* ── timer ── */
+  .timer {
+    text-align: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--danger);
+    margin-top: 10px;
+    display: none;
+  }
+
+  .timer.ativo { display: block; }
+
+  /* ── toast ── */
+  #toast {
+    position: fixed;
+    bottom: 26px; right: 26px;
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 13px 20px;
+    font-size: .8rem;
+    color: var(--text);
+    max-width: 300px;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: transform .3s, opacity .3s;
+    z-index: 999;
+  }
+
+  #toast.show      { transform: translateY(0); opacity: 1; }
+  #toast.show.erro { border-color: var(--danger); }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <header>
+    <div class="brand">
+      <h1>Lista de <span>Compras</span></h1>
+      <p>Assistente Virtual · Comandos por Voz</p>
+    </div>
+    <div class="badge"><div class="dot"></div> sistema ativo</div>
+  </header>
+
+  <!-- microfone -->
+  <div class="card">
+    <div class="card-title">Comando por Voz</div>
+
+    <div class="voz-btns">
+
+      <!-- botao iniciar -->
+      <button class="btn-voz btn-iniciar" id="btnIniciar" onclick="iniciarGravacao()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8"  y1="23" x2="16" y2="23"/>
+        </svg>
+        <span id="labelIniciar">Clique e Fale o Comando</span>
+      </button>
+
+      <!-- botoes parar e cancelar (aparecem durante gravacao) -->
+      <div class="btns-acao" id="btnsAcao" style="display:none">
+        <button class="btn-voz btn-parar" onclick="pararGravacao(false)">
+          ✓ Pronto, Reconhecer
+        </button>
+        <button class="btn-voz btn-cancelar" onclick="pararGravacao(true)">
+          ✕ Cancelar
+        </button>
+      </div>
+
+    </div>
+
+    <!-- timer de gravacao -->
+    <div class="timer" id="timer">00:00</div>
+
+    <div class="resultado-box" id="resultadoBox">
+      aguardando comando de voz...
+    </div>
+
+    <div class="dicas">
+      <div class="dica-linha"><span class="dica-tag">adicionar</span><span><strong>"adicionar dois pacotes de arroz"</strong></span></div>
+      <div class="dica-linha"><span class="dica-tag">exibir</span><span><strong>"mostrar lista"</strong> · "ver itens"</span></div>
+      <div class="dica-linha"><span class="dica-tag">remover</span><span><strong>"remover arroz"</strong> · "excluir leite"</span></div>
+      <div class="dica-linha"><span class="dica-tag">organizar</span><span><strong>"atualizar lista"</strong> · "organizar compras"</span></div>
+    </div>
+  </div>
+
+  <!-- tabela -->
+  <div class="card">
+    <div class="card-title">Itens na Lista</div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Produto</th>
+            <th>Quantidade</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaBody">
+          <tr><td colspan="4" class="empty">carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const API = "http://localhost:5000/api";
+
+  let _timerInterval = null;
+  let _segundos = 0;
+
+  // ── toast ─────────────────────────────────────────────────────────
+  function toast(msg, erro = false) {
+    const el = document.getElementById("toast");
+    el.textContent = msg;
+    el.className   = "show" + (erro ? " erro" : "");
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.className = "", 3200);
+  }
+
+  // ── timer ─────────────────────────────────────────────────────────
+  function iniciarTimer() {
+    _segundos = 0;
+    const el = document.getElementById("timer");
+    el.classList.add("ativo");
+    _timerInterval = setInterval(() => {
+      _segundos++;
+      const m = String(Math.floor(_segundos / 60)).padStart(2, "0");
+      const s = String(_segundos % 60).padStart(2, "0");
+      el.textContent = `${m}:${s}`;
+    }, 1000);
+  }
+
+  function pararTimer() {
+    clearInterval(_timerInterval);
+    const el = document.getElementById("timer");
+    el.classList.remove("ativo");
+    el.textContent = "00:00";
+  }
+
+  // ── estado dos botoes ─────────────────────────────────────────────
+  function setGravando(gravando) {
+    const btnIniciar = document.getElementById("btnIniciar");
+    const btnsAcao   = document.getElementById("btnsAcao");
+    const label      = document.getElementById("labelIniciar");
+
+    if (gravando) {
+      btnIniciar.classList.add("gravando");
+      btnIniciar.disabled  = true;
+      label.textContent    = "gravando...";
+      btnsAcao.style.display = "grid";
+      iniciarTimer();
+    } else {
+      btnIniciar.classList.remove("gravando");
+      btnIniciar.disabled  = false;
+      label.textContent    = "Clique e Fale o Comando";
+      btnsAcao.style.display = "none";
+      pararTimer();
+    }
+  }
+
+  // ── iniciar gravacao ──────────────────────────────────────────────
+  async function iniciarGravacao() {
+    const box = document.getElementById("resultadoBox");
+    box.innerHTML = "<span class='lbl'>►</span> gravando... fale o comando e clique em Pronto!";
+
+    try {
+      const res  = await fetch(`${API}/iniciar_gravacao`, { method: "POST" });
+      const data = await res.json();
+
+      if (data.erro) {
+        box.innerHTML = `<span class='lbl lbl-err'>ERRO</span>${data.erro}`;
+        toast(data.erro, true);
+        return;
+      }
+
+      setGravando(true);
+
+    } catch {
+      box.innerHTML = `<span class='lbl lbl-err'>ERRO</span>servidor offline`;
+      toast("servidor offline — execute: python servidor.py", true);
+    }
+  }
+
+  // ── parar gravacao ────────────────────────────────────────────────
+  async function pararGravacao(cancelar = false) {
+    const box = document.getElementById("resultadoBox");
+
+    setGravando(false);
+
+    if (cancelar) {
+      await fetch(`${API}/parar_gravacao`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cancelar: true })
+      });
+      box.innerHTML = "<span class='lbl'>—</span> gravacao cancelada";
+      toast("gravação cancelada");
+      return;
+    }
+
+    box.innerHTML = "<span class='lbl'>⟳</span> reconhecendo fala...";
+
+    try {
+      const res  = await fetch(`${API}/parar_gravacao`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cancelar: false })
+      });
+      const data = await res.json();
+
+      if (data.erro) {
+        box.innerHTML = `<span class='lbl lbl-err'>ERRO</span>${data.erro}`;
+        toast(data.erro, true);
+      } else {
+        const corMsg = data.valido ? "lbl-ok" : "lbl-err";
+        box.innerHTML = `
+          <div><span class='lbl'>FALA</span>${data.transcricao || "—"}</div>
+          <div><span class='lbl'>AÇÃO</span>${data.valido ? data.acao : "não reconhecido"}</div>
+          <div><span class='lbl ${corMsg}'>RESULTADO</span>${data.mensagem || "—"}</div>
+        `;
+        toast(data.mensagem || "comando processado", !data.valido);
+        if (data.valido) carregarItens();
+      }
+    } catch {
+      box.innerHTML = `<span class='lbl lbl-err'>ERRO</span>servidor offline`;
+      toast("servidor offline", true);
+    }
+  }
+
+  // ── carregar itens ────────────────────────────────────────────────
+  async function carregarItens() {
+    try {
+      const res  = await fetch(`${API}/itens`);
+      const data = await res.json();
+      renderTabela(data.itens || []);
+    } catch {
+      document.getElementById("tabelaBody").innerHTML =
+        `<tr><td colspan="4" class="empty">servidor offline — execute: python servidor.py</td></tr>`;
+    }
+  }
+
+  function renderTabela(itens) {
+    const tbody = document.getElementById("tabelaBody");
+    if (!itens.length) {
+      tbody.innerHTML = `<tr><td colspan="4" class="empty">a lista está vazia</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = itens.map(i => `
+      <tr>
+        <td style="color:var(--muted)">#${i.id}</td>
+        <td><strong>${i.produto}</strong></td>
+        <td>${i.quantidade}</td>
+        <td><span class="status-tag">${i.status}</span></td>
+      </tr>`).join("");
+  }
+
+  carregarItens();
+  setInterval(carregarItens, 5000);
+</script>
+</body>
+</html>
