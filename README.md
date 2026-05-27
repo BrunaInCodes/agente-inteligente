@@ -2,6 +2,8 @@
 
 Gerencie sua lista de compras usando comandos de voz em **português brasileiro**. O agente transcreve sua fala em tempo real, interpreta o comando e atualiza automaticamente uma planilha `.xlsx`.
 
+Funciona de **duas formas**: via interface web no navegador ou direto pelo terminal — você escolhe como prefere usar.
+
 ---
 
 ## ✨ O que você pode fazer
@@ -12,6 +14,29 @@ Gerencie sua lista de compras usando comandos de voz em **português brasileiro*
 | *"mostrar lista"* | Exibe todos os itens |
 | *"tirar arroz"* | Remove um item pelo nome |
 | *"atualizar lista"* | Organiza em ordem alfabética |
+
+---
+
+## 🖥️ Duas formas de usar
+
+### 🌐 Via interface web (recomendado)
+
+Inicie o servidor Flask e acesse pelo navegador. Você terá uma interface visual para gravar sua voz, ver a lista e acompanhar o resultado dos comandos em tempo real.
+
+```bash
+python servidor.py
+# acesse http://localhost:5000
+```
+
+### 💻 Via terminal
+
+Prefere rodar tudo no terminal sem abrir o navegador? Execute o assistente diretamente:
+
+```bash
+python assistente.py
+```
+
+O assistente captura o áudio pelo microfone, transcreve, interpreta o comando e exibe o resultado no próprio terminal — simples e direto.
 
 ---
 
@@ -34,7 +59,7 @@ Gerencie sua lista de compras usando comandos de voz em **português brasileiro*
 
 ---
 
-## 🚀 Como rodar
+## 🚀 Instalação
 
 ### 1. Clone o repositório
 
@@ -59,15 +84,20 @@ nltk.download('punkt')
 nltk.download('stopwords')
 ```
 
-### 4. Inicie o servidor
+### 4. Escolha como quer rodar
 
+**Interface web:**
 ```bash
 python servidor.py
+# abra http://localhost:5000 no navegador
 ```
 
-Acesse **http://localhost:5000** no navegador.
+**Terminal:**
+```bash
+python assistente.py
+```
 
-> Na primeira execução, o modelo Wav2Vec2 será baixado automaticamente (~1 GB). Isso pode levar alguns minutos dependendo da sua conexão.
+> Na primeira execução, o modelo Wav2Vec2 será baixado automaticamente (~1 GB). Isso pode levar alguns minutos dependendo da sua conexão. Nas próximas vezes, o modelo já estará em cache.
 
 ---
 
@@ -75,23 +105,23 @@ Acesse **http://localhost:5000** no navegador.
 
 ```
 agente-inteligente/
-├── assistente.py          # Lógica principal: captura, tokenização e validação
-├── servidor.py            # API Flask com endpoints de gravação e lista
-├── transcritor.py         # Carregamento do modelo e transcrição de áudio
-├── inicializador_modelo.py# Utilitário para carregar o Wav2Vec2
-├── planilha.py            # CRUD da lista de compras no .xlsx
-├── testes.py              # Testes automatizados dos comandos
-├── config.json            # Configuração de ações e sinônimos
-├── lista_de_compras.xlsx  # Planilha gerada automaticamente
+├── assistente.py           # Lógica principal: captura, tokenização e validação
+├── servidor.py             # API Flask + modo web (http://localhost:5000)
+├── transcritor.py          # Carregamento do modelo e transcrição de áudio
+├── inicializador_modelo.py # Utilitário para carregar o Wav2Vec2
+├── planilha.py             # CRUD da lista de compras no .xlsx
+├── testes.py               # Testes automatizados dos comandos
+├── config.json             # Configuração de ações e sinônimos
+├── lista_de_compras.xlsx   # Planilha gerada automaticamente
 ├── requirements.txt
-└── index.html             # Interface web
+└── index.html              # Interface web
 ```
 
 ---
 
 ## ⚙️ Configuração
 
-Edite o `config.json` para personalizar sinônimos das ações:
+Edite o `config.json` para personalizar os sinônimos de cada ação:
 
 ```json
 {
@@ -129,7 +159,7 @@ python testes.py
 ## 🐛 Problemas comuns
 
 **O modelo demora muito para carregar**
-> Normal na primeira execução. O download é de ~1 GB. Nas próximas vezes, o modelo fica em cache.
+> Normal na primeira execução — o download é de ~1 GB. Nas próximas vezes é instantâneo.
 
 **Erro com microfone / sounddevice**
 > Verifique se o microfone está selecionado como dispositivo de entrada padrão no sistema operacional.
@@ -137,12 +167,6 @@ python testes.py
 **GPU não detectada**
 > O projeto roda normalmente na CPU. Para usar GPU, instale o PyTorch com suporte a CUDA: veja [pytorch.org](https://pytorch.org/get-started/locally/).
 
----
+**Comando não reconhecido**
+> Fale de forma clara e use os sinônimos definidos no `config.json`. Você pode adicionar novas palavras-gatilho diretamente nesse arquivo sem mexer no código.
 
-## 📄 Licença
-
-MIT — sinta-se à vontade para usar, modificar e distribuir.
-
----
-
-Feito com 🎙️ por [Bruna](https://github.com/BrunaInCodes)
